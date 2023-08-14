@@ -1,15 +1,15 @@
 <?php
-
-namespace MyApp\query;
+include __DIR__ . '/../../src/data/database.php'; // Asegúrate de tener la ruta correcta
+//__DIR__ . 
 
 class Select
 {
     public function seleccionar($qry)
     {
         $host = "localhost";
-        $username = "root";
-        $password = "";
-        $dbname = "sharkshop";
+        $username = "id21136453_quetzal";
+        $password = "DQuetzal_127";
+        $dbname = "id21136453_shark";
 
         $connection = new \mysqli($host, $username, $password, $dbname);
 

@@ -1,20 +1,14 @@
 <?php
-
-namespace MyApp\Data;
-use mysqli;
-
 class Mysqlconexion
 {
     public $conexion = null;
-    public $user = "root";
-    public $password = "";
-    public $dbname = "sharkshop";
+    public $user = "id21136453_quetzal";
+    public $password = "DQuetzal_127";
+    public $dbname = "id21136453_shark";
 
-    public function __construct(string $dbname, string $user, string $password)
+    public function __construct()
     {
-        $this->dbname = $dbname;
-        $this->user = $user;
-        $this->password = $password;
+        // No es necesario pasar dbname, user y password aquí, ya que están predefinidos
     }
 
     public function getConexion()
@@ -36,5 +30,3 @@ class Mysqlconexion
         }
     }
 }
-
-?>

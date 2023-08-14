@@ -1,124 +1,200 @@
-<!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONTACTOS</title>
-    <link rel="shortcut icon" href="imgs/logo_sinfondo.png" type="image/x-icon">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="Vista_Usuario/style_index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <title>SHARKSHOP</title>
+  </head>
+  <body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 
-    <style>
-        form{
-    width: 400px;
-    margin:auto;
+        <nav class="navbar navbar-expand-lg navbar-light bg-light position-relative top-0 start-0 w-100">
+            <div class="container">        
+                <a href="./index.php" class="navbar-brand d-lg-none">
+                    SHARKSHOP
+                </a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                    <span class="navbar-toggler-icon" ></span>
+                </button>
+
+                <div class="collapse navbar-collapse p-2 flex-column" id="navbarContent">
+                    <div class="d-flex justify-content-center justify-content-lg-between flex-column flex-lg-row w-100" >
+                        <a href="./index.php" class="navbar-brand d-none d-lg-block">SHARKSHOP</a>
+                        <ul class="navbar-nav">
+                        <?php
+                        if(isset($_SESSION["correo"]))
+                                {
+                                    
+                                // Primero la session, despues los roles...
+                                    
+                                    $tel_celular = $_SESSION["tel_celular"];
+
+                                    if($ROL == 5)
+                                    {
+                                echo"
+                                <li class='nav-item d-flex align-items-center'>
+                                    <a href='Administrador/index.php' class='nav-link mx-2'>
+                                    <i class='fas fa-user'></i><i class='bi bi-person'></i>
+                                    Admin
+                                    </a>
+                                </li>
+                                ";
+                                }
+                                echo"
+                             <li class='nav-item d-flex align-items-center'>
+                                <a href='Vista_Usuario/micuenta.php' class='nav-link mx-2'>
+                                <i class='fas fa-user'></i><i class='bi bi-person'></i>
+                                 Mi Cuenta
+                                </a>
+                             </li>
+                             <li class='nav-item d-flex align-items-center'>
+                                <a href='Vista_Usuario/vistacarro.php' class='nav-link mx2' >
+                                    <i class='fas fa-shopping-bag'></i><i class='bi bi-cart2'></i>
+                                    Carrito
+                                </a>
+                            </li>
+                            ";
+                            }
+                            else
+                            {
+                            echo"
+                            <li class='nav-item d-flex align-items-center'>
+                                <a href='Vista_Usuario/login.php' class='nav-link mx-2'>
+                                    <i class='fas fa-user'></i><i class='bi bi-person'></i>
+                                    Login
+                                </a>
+                            </li>
+                            <li class='nav-item d-flex align-items-center'>
+                                <a href='Vista_Usuario/login.php' class='nav-link mx2'>
+                                    <i class='fas fa-shopping-bag'></i><i class='bi bi-cart2'></i>
+                                    Carrito
+                                </a>
+                                <span class='badge rounded-pill bg-secondary'>0</span> 
+                            </li>
+                            ";
+                            }?>
+                        </ul>
+                    </div>
+                    <div class="d-block w-100">
+                        <ul class="navbar-nav d-flex justify-content-center align-items-center pt-3">
+                            <li class="nav-item mx-2">
+                                <a href="Vista_Usuario/listaproductos_ropa.php" style="text-decoration: none;"><button class="btn btn-outline-dark" type="submit ">TODOS LOS PRODUCTOS</button></a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <header class="position-relative text-center text-white mb-5">
+            <img src="src/imgs/otrofondolr.jpg" class="w-100" alt="Banner"/>
+            <div class="position-absolute top-50 start-50 translate-middle-x w-100 px-3">
+                <h1 class="display-4">Colección Verano 2023</h1>
+                <a href="#new" class="btn btn-light">Explorar Novedades</a>
+            </div>
+        </header>
+        <div class="container position-relative text-center">
+        <h2 id="new" class="display-6 py-5">Más populares</h2>  
+        <div class="d-flex justify-content-between align-items-center flex-column flex-lg-row my-5">
+            <?php
+// Configuración de la conexión a la base de datos
+$servername = "";
+$username = "id21136453_quetzal";
+$password = "DQuetzal_127";
+$dbname = "id21136453_shark";
+
+// Crear la conexión
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Verificar la conexión
+if ($conn->connect_error) {
+    die("Conexión fallida: " . $conn->connect_error);
 }
-        body {
-            background-image: url("../src/imgs/flr.jpg");
-            background-size: cover;
-            background-repeat: no-repeat;
-            background-position: center;
-        }
 
-        .container {
-            max-width: 500px;
-            margin: 0 auto;
-            padding-top: 10px;
-            background-color: aliceblue;
-           border-radius: 10px;
-        }
+$cadena = "SELECT * FROM productos ORDER BY existencia DESC LIMIT 3";
 
-        img.logo {
-            display: block;
-            margin: 0 auto;
-            margin-top: 10px;
-            width: 150px;
-        }
+// Realizar la consulta
+$result = $conn->query($cadena);
 
-        h3 {
-            text-align: center;
-            margin-top: 10px;
-        }
+if ($result->num_rows > 0) {
+    echo "<div class='row'>"; // Iniciar una fila para mostrar las tarjetas
 
-        .form-label {
-            font-weight: bold;
-        }
-
-        .form-control {
-            margin-bottom: 10px;
-        }
-
-        .btn {
-            width: 100%;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
-    <?php
-    session_start();
-    $ROL = $_SESSION["Rol"];
-
-    if(!isset($_SESSION["correo"]))
-    {
-    ?>
-    <div class="container">
-        <div class="text-center">
-            <img src="../src/imgs/logo_sinfondo.png" alt="" class="logo">
-            <h3>LOGIN</h3>
-            <form action="../views/scripts/verificalogin.php" method="post" id="formIniciar">
-                <div class="mb-3">
-                    <label for="correo" class="form-label">Correo electrónico</label>
-                    <input type="email" class="form-control" name="correo" placeholder="tunombre@gmail.com">
+    while($dato = $result->fetch_assoc()) {
+        echo "
+        <div class='col-md-4'>
+            <div class='card m-2'>
+                <a href='Vista_Usuario/producto.php?id={$dato["cve_prod"]}'>
+                    <img src='fotos/{$dato["imagen"]}' style='width:250px; height:350px' class='' height='300' alt='Producto'/>
+                </a>
+                <div class='card-body'>
+                    <p class='card-text fw-bold'> {$dato["nombre_pro"]} </p>
+                    <small class='text-secondary'>$ {$dato["precio"]} </small>
                 </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Contraseña</label>
-                    <input type="password" class="form-control" name="pass">
-                </div>
-                <div class="mb-3">
-                    <label for="telefono" class="form-label">Telefono</label>
-                    <input type="text" class="form-control" name="tel_celular">
-                </div>
-                <!--
-                    
-                Quitar el telefono jajaja]
-                
-                Agregariamos que solo puedan pasar los chicos que tengan el rol = 10 ademas de una cuenta existente
-                ( podria poner un modal donde al dar click me mande un alaert con el link hacia la pagina de verificar. )
+            </div>
+        </div>
+        ";
+    }
 
-                
-                '-->
-                <div class="mb-3">
-                    <button  type="submit" class="btn btn-success">Iniciar Sesion</button>
-                </div>
-                <div class="mb-3">
-                    <a href="register.php" class="btn btn-success">Registrate</a>
-                </div>
-            </form>
+    echo "</div>"; // Cerrar la fila
+} else {
+    echo "No se encontraron resultados.";
+}
+
+// Cerrar la conexión
+$conn->close();?>
+        </div>
+        <a href="Vista_Usuario/listaproductos_ropa.php" class="btn btn-outline-dark my-5">Ver todo los productos</a>
+        </div>
+
+<div class="row text-start align-items-center gy-5 my-5">
+    <div class="col-12 col-md-6">
+        <img src="src/imgs/modelo_nirvana.jpg" alt="" class="w-100 h-100"/>
+    </div>
+    <div class="col-12 col-md-6">
+        <div>
+            <h2 class="display-4">¿Quiénes somos?</h2>
+            <p>Somos un concepto que nace del resultado de combinar estilo y tecnología. 
+                Gracias a nuestras maravillosas collecciones y excelente servicio al cliente, hemos tenido muchísimo éxito desde el primer día. 
+                Navega por nuestro sitio web y consulta las últimas colecciones que tenemos; no dudes en contactarnos en caso de que necesites ayuda.
+                ¡Felices compras!
+            </p>
         </div>
     </div>
-
-
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/cdn.jsdelivr.net_npm_sweetalert2@11.7.12_dist_sweetalert2.all.min.js"></script>
-    <?php
-    }
-    else
-    {
-    ?>
-        <div class="alert alert-danger" role="alert">
-            <h4 class="alert-heading" style="margin-left: 40px;">Cuenta activa!!!</h4>
-            <svg xmlns="http://www.w3.org/2000/svg" style="width: 30px; margin-top: -75px;" class="bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Warning:">
-            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-            </svg>
-            <p>Ya cuentas con una cuenta, te pedimos amablemente salir de esta URL dirigiendote a: <a href="../index.php"><button class="btn btn-dark"> Pagina </button></a>.</p>
-            <hr>
-            <p class="mb-0">Muchas gracias por entender y disfrute de la estadia en la pagina.</p>
+</div>
+<div class="form-area">
+    <div class="container">
+        <div class="row single-form g-0">
+            <div class="col-sm-12 col-lg-6">
+                <div class="left">
+                    <h2><span>Contáctanos</span></h2>
+                </div>
+            </div>
+            <div class="col-sm-12 col-lg-6">
+                <div class="right">
+                    <form method="POST" action="send.php">
+                        <div class="mb-3">
+                          <label for="exampleInputEmail1" class="form-label">Asunto</label>
+                          <input type="text" class="form-control" name="subject" id="subject" aria-describedby="emailHelp">
+                          <div id="emailHelp" class="form-text"></div>
+                        </div>
+                        <div class="mb-3">
+                          <label for="exampleInputPassword1" class="form-label">Correo electrónico</label>
+                          <input type="email" class="form-control" name="email" id="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleInputPassword1" class="form-label">Mensaje</label>
+                            <textarea class="form-control" name="message" id="message"></textarea>
+                          </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                      </form>
+                </div>
+            </div>
         </div>
-    <?php
-    }
-    ?>
-</body>
+    </div>
+</div>
+  </body>
 </html>

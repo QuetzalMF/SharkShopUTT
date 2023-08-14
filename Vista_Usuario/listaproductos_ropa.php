@@ -47,15 +47,15 @@
                     <ul class="navbar-nav">
                         <?php
 
-                        require_once "../src/query/Select.php"; // Asegúrate de incluir la ubicación correcta del archivo Select.php
-                        require_once "../src/data/database.php"; // Asegúrate de incluir la ubicación correcta del archivo Mysqlconexion.php
                         use MyApp\query\Select;
                         use MyApp\Data\Mysqlconexion;
 
-                        session_start();
-                        $ROL = $_SESSION["Rol"];
+                        
+                        
                         if(isset($_SESSION["correo"]))
                         {
+                            session_start();
+                            $ROL = $_SESSION["Rol"];
                             $tel_celular = $_SESSION["tel_celular"];
                             $id_usr = $_SESSION["id_usr"];
                             if($_SESSION["Rol"] == 5)
@@ -84,14 +84,22 @@
                                 Carrito
                             </a>
                             <?php
+                            $servername = "localhost";
+                            $username = "id21136453_quetzal";
+                            $password = "DQuetzal_127";
+                            $dbname = "id21136453_shark";
                             
-                            $queryC = new Select();
-                            $conexion = new Mysqlconexion("sharkshop", "root", ""); // Asegúrate de proporcionar los datos correctos de conexión
+                            // Crear la conexión
+                            $conn = new mysqli($servername, $username, $password, $dbname);
+                            
+                            // Verificar la conexión
+                            if ($conn->connect_error) {
+                                die("Conexión fallida: " . $conn->connect_error);
+                            }
                             
                             /* Modifica conforme al id del usuario */
                             $cadenaC = "SELECT COUNT(reg_det) as total FROM detalle_orden WHERE id_usuario = '$id_usr' AND estado = 0";
-                            $miconsultaC = $queryC->seleccionar($cadenaC, $conexion->getConexion());
-                            
+                            $miconsultaC = $conn->query($cadenaC);
                             foreach ($miconsultaC as $datos => $arreglo) {
                                 foreach ($arreglo as $Key => $value) {
                                     $limites = $value;
@@ -193,102 +201,105 @@
         
         <div class='col col-9.5 d-flex flex-wrap justify-content-between'>
         <?php
+        $servername = "localhost";
+                            $username = "id21136453_quetzal";
+                            $password = "DQuetzal_127";
+                            $dbname = "id21136453_shark";
+                            
+                            // Crear la conexión
+                            $conn = new mysqli($servername, $username, $password, $dbname);
+                            
+                            // Verificar la conexión
+                            if ($conn->connect_error) {
+                                die("Conexión fallida: " . $conn->connect_error);
+                            }
+                            
         if (isset($_GET['enviar'])) 
         {
            if(isset($_SESSION["correo"]))/*----------------------------*/
-           {
+            {
+            $busqueda = isset($_GET['busqueda']) ? $_GET['busqueda'] : '';
+            $estado = isset($_GET['estado']) ? $_GET['estado'] : '';
+            
+            $cadenacom = "SELECT producto FROM detalle_orden WHERE id_usuario = '$id_usr' AND estado = 0 ";
+            $tablComa = $conn->query($cadenacom);
+            
+            $cadena = "SELECT * FROM productos WHERE nombre_pro LIKE '%$busqueda%' AND talla LIKE '%$estado%' AND existencia > 0 ";
+            $tabla = $conn->query($cadena);
+            
+            foreach ($tabla as $datos) {
+                $comparande = $datos['cve_prod']; // Corregido para acceder a la clave de producto
+                $estaEnCarrito = false;
+            
+                echo "
+                <div class='card m-2'>
+                    <a href='./producto.php?id={$datos["cve_prod"]}'>
+                        <img src='../fotos/{$datos["imagen"]}' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
+                    </a>
+                    <div class='card-body'>
+                        <p class='card-text fw-bold'>{$datos["nombre_pro"]}</p>
+                        <small class='text-secondary'>$ {$datos["precio"]}</small>
+                        <br>
+                        <br>
+                ";
+                if ($limites <= 5) {
+                    foreach ($tablComa as $datoComa) {
+                        $comparar = $datoComa['producto']; // Corregido para acceder al producto
+            
+                        if ($comparar === $comparande) {
+                            $estaEnCarrito = true;
+                            break; // Rompe el bucle cuando se encuentra una coincidencia
+                        }
+                    }
+                    if ($estaEnCarrito) {
+                        echo "
+                            <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Ya está en el carrito </div></a>
+                        ";
+                    } else {
+                        echo "
+                            <a href='../views/scripts/guardacarrito.php?id=$comparande'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
+                        ";
+                    }
+                } else {
+                    echo "
+                        <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Carrito Lleno </div></a>
+                    ";
+                }
+            
+                echo "
+                    </div>
+                </div>
+                ";
+            }
 
-                           $busqueda = $_GET['busqueda'];
-                           $estado = isset($_GET['estado']) ? $_GET['estado'] : '';
-                           $query = new Select();
-
-                           $cadenacom = "SELECT producto from detalle_orden WHERE id_usuario = '$id_usr' and estado = 0 ";
-                           $tablComa = $query->seleccionar($cadenacom);
-
-
-                           $cadena = "SELECT * from productos WHERE nombre_pro LIKE '%$busqueda%' AND talla LIKE '%$estado%' AND existencia > 0 ";
-                           $tabla = $query->seleccionar($cadena);
-                           foreach ($tabla as $datos) 
-                           {
-                           $comparande = $datos->cve_prod;
-                           $estaEnCarrito = false;
-                       
-                       
-                           echo "
-                           <div class='card m-2'>
-                               <a href='./producto.php?id=$datos->cve_prod'>
-                                   <img src='../fotos/$datos->imagen' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
-                               </a>
-                               <div class='card-body'>
-                                   <p class='card-text fw-bold'>$datos->nombre_pro</p>
-                                   <small class='text-secondary'>$ $datos->precio</small>
-                                   <br>
-                                   <br>
-                           ";
-                               if($limites <= 5)
-                               {
-                                   foreach ($tablComa as $datoComa) 
-                                   {
-                                       $comparar = $datoComa->producto;
-                               
-                                       if ($comparar === $comparande) 
-                                       {
-                                           $estaEnCarrito = true;
-                                           break; // Rompe el bucle cuando se encuentra una coincidencia
-                                       }
-                                   }
-                                   if ($estaEnCarrito) {
-                                       echo "
-                                           <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Ya esta dentro del carrito </div></a>
-                                       ";
-                                   }
-                                   else
-                                   {
-                                       echo "
-                                       <a href='../views/scripts/guardacarrito.php?id=$comparando' ><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
-                                       ";
-                                   }
-                               }
-                               else
-                               {
-                                   echo "
-                                   <a href='#' ><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Carrito Lleno </div></a>
-                                   ";
-                               }
-                           
-                           echo "
-                               </div>
-                           </div>
-                           ";
-                       }
 
            }
            else/*----------------------------*/
-           {
-                   $busqueda = $_GET['busqueda'];
-                   $estado = isset($_GET['estado']) ? $_GET['estado'] : '';
-                   $query = new Select();
+            {
+                                 
+                $busqueda = $_GET['busqueda'];
+                $estado = isset($_GET['estado']) ? $_GET['estado'] : '';
+                
+                $cadena = "SELECT * FROM productos WHERE nombre_pro LIKE '%$busqueda%' AND talla LIKE '%$estado%' AND existencia > 0 ";
+                $tabla = $conn->query($cadena);
+                
+                foreach ($tabla as $datos) {
+                    echo "
+                    <div class='card m-2'>
+                        <a href='./producto.php?id={$datos["cve_prod"]}'>
+                            <img src='../fotos/{$datos["imagen"]}' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
+                        </a>
+                        <div class='card-body'>
+                            <p class='card-text fw-bold'>{$datos["nombre_pro"]}</p>
+                            <small class='text-secondary'>$ {$datos["precio"]}</small>
+                            <br>
+                            <br>
+                            <a href='./login.php'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
+                        </div>
+                    </div>
+                    ";
+                }
 
-                   
-                   $cadena = "SELECT * from productos WHERE nombre_pro LIKE '%$busqueda%' AND talla LIKE '%$estado%' AND existencia > 0 ";
-                   $tabla = $query->seleccionar($cadena);
-                   foreach ($tabla as $datos) 
-                   {
-                       echo "
-                       <div class='card m-2'>
-                           <a href='./producto.php?id=$datos->cve_prod'>
-                               <img src='../fotos/$datos->imagen' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
-                           </a>
-                           <div class='card-body'>
-                               <p class='card-text fw-bold'>$datos->nombre_pro</p>
-                               <small class='text-secondary'>$ $datos->precio</small>
-                               <br>
-                               <br>
-                               <a href='./login.php'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
-                           </div>
-                       </div>
-                       ";
-                   }
 
            }/*----------------------------*/
 
@@ -297,93 +308,83 @@
        {
            if(isset($_SESSION["correo"]))/*----------------------------*/
            {
-           
-                   $variable_ro = $_GET["variable_ro"];
-                   $query = new Select();
-
-                   $cadenacom = "SELECT producto from detalle_orden WHERE id_usuario = '$id_usr' and estado = 0 ";
-                   $tablComa = $query->seleccionar($cadenacom);
-
-                   $cadena = "SELECT * FROM productos WHERE categoria = '$variable_ro' and existencia > 0 ORDER BY existencia DESC LIMIT 6  ";
-                   $tabla = $query->seleccionar($cadena);
-                   foreach ($tabla as $datos) 
-                   {
-                   $comparande = $datos->cve_prod;
-                   $estaEnCarrito = false;
-               
-               
-                   echo "
-                   <div class='card m-2'>
-                       <a href='./producto.php?id=$datos->cve_prod'>
-                           <img src='../fotos/$datos->imagen' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
-                       </a>
-                       <div class='card-body'>
-                           <p class='card-text fw-bold'>$datos->nombre_pro</p>
-                           <small class='text-secondary'>$ $datos->precio</small>
-                           <br>
-                           <br>
-                   ";
-                       if($limites <= 5)
-                       {
-                           foreach ($tablComa as $datoComa) 
-                           {
-                               $comparar = $datoComa->producto;
-                       
-                               if ($comparar === $comparande) 
-                               {
-                                   $estaEnCarrito = true;
-                                   break; // Rompe el bucle cuando se encuentra una coincidencia
-                               }
-                           }
-                           if ($estaEnCarrito) {
-                               echo "
-                                   <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Ya esta dentro del carrito </div></a>
-                               ";
-                           }
-                           else
-                           {
-                               echo "
-                               <a href='../views/scripts/guardacarrito.php?id=$comparande' ><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
-                               ";
-                           }
-                       }
-                       else
-                       {
-                           echo "
-                           <a href='#' ><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Carrito Lleno </div></a>
-                           ";
-                       }
-                   echo "
-                       </div>
-                   </div>
-                   ";
-               }
+            $variable_ro = $_GET["variable_ro"];
+            
+            $cadenacom = "SELECT producto FROM detalle_orden WHERE id_usuario = '$id_usr' AND estado = 0 ";
+            $tablComa = $conn->query($cadenacom);
+            
+            $cadena = "SELECT * FROM productos WHERE categoria = '$variable_ro' AND existencia > 0 ORDER BY existencia DESC LIMIT 6";
+            $tabla = $conn->query($cadena);
+            
+            foreach ($tabla as $datos) {
+                $comparande = $datos['cve_prod']; // Corregido para acceder a la clave de producto
+                $estaEnCarrito = false;
+            
+                echo "
+                <div class='card m-2'>
+                    <a href='./producto.php?id={$datos["cve_prod"]}'>
+                        <img src='../fotos/{$datos["imagen"]}' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
+                    </a>
+                    <div class='card-body'>
+                        <p class='card-text fw-bold'>{$datos["nombre_pro"]}</p>
+                        <small class='text-secondary'>$ {$datos["precio"]}</small>
+                        <br>
+                        <br>
+                ";
+                if ($limites <= 5) {
+                    foreach ($tablComa as $datoComa) {
+                        $comparar = $datoComa['producto']; // Corregido para acceder al producto
+            
+                        if ($comparar === $comparande) {
+                            $estaEnCarrito = true;
+                            break; // Rompe el bucle cuando se encuentra una coincidencia
+                        }
+                    }
+                    if ($estaEnCarrito) {
+                        echo "
+                            <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Ya está en el carrito </div></a>
+                        ";
+                    } else {
+                        echo "
+                            <a href='../views/scripts/guardacarrito.php?id=$comparande'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
+                        ";
+                    }
+                } else {
+                    echo "
+                        <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Carrito Lleno </div></a>
+                    ";
+                }
+            
+                echo "
+                    </div>
+                </div>
+                ";
+            }
+                  
+                  
            }
            else/*----------------------------*/
            {
-                   $variable_ro = $_GET["variable_ro"];
-                   $query = new Select();
-
-                   
-                   $cadena = "SELECT * from productos WHERE categoria = '$variable_ro' and existencia > 0 ORDER BY existencia DESC LIMIT 6 ";
-                   $tabla = $query->seleccionar($cadena);
-                   foreach ($tabla as $datos) 
-                   {
-                       echo "
-                       <div class='card m-2'>
-                           <a href='./producto.php?id=$datos->cve_prod'>
-                               <img src='../fotos/$datos->imagen' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
-                           </a>
-                           <div class='card-body'>
-                               <p class='card-text fw-bold'>$datos->nombre_pro</p>
-                               <small class='text-secondary'>$ $datos->precio</small>
-                               <br>
-                               <br>
-                               <a href='./login.php'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
-                           </div>
-                       </div>
-                       ";
-                   }
+               
+                $variable_ro = $_GET["variable_ro"];
+                $cadena = "SELECT * FROM productos WHERE categoria = '$variable_ro' AND existencia > 0 ORDER BY existencia DESC LIMIT 6";
+                $tabla = $conn->query($cadena);
+                foreach ($tabla as $datos) {
+                    echo "
+                    <div class='card m-2'>
+                        <a href='./producto.php?id={$datos["cve_prod"]}'>
+                            <img src='../fotos/{$datos["imagen"]}' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
+                        </a>
+                        <div class='card-body'>
+                            <p class='card-text fw-bold'>{$datos["nombre_pro"]}</p>
+                            <small class='text-secondary'>$ {$datos["precio"]}</small>
+                            <br>
+                            <br>
+                            <a href='./login.php'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
+                        </div>
+                    </div>
+                    ";
+                }
 
            }/*----------------------------*/
 
@@ -392,92 +393,81 @@
        {
            if(isset($_SESSION["correo"]))/*----------------------------*/
            {
-                       $variable_pa = $_GET["variable_pa"];
-                       $query = new Select();
-
-                       $cadenacom = "SELECT producto from detalle_orden WHERE id_usuario = '$id_usr' and estado = 0 ";
-                       $tablComa = $query->seleccionar($cadenacom);
-
-                       $cadena = "SELECT * from productos WHERE categoria = '$variable_pa' and existencia > 0 ORDER BY existencia DESC LIMIT 6 ";
-                       $tabla = $query->seleccionar($cadena);
-                       foreach ($tabla as $datos) 
-                       {
-                       $comparande = $datos->cve_prod;
-                       $estaEnCarrito = false;
-                   
-                   
-                       echo "
-                       <div class='card m-2'>
-                           <a href='./producto.php?id=$datos->cve_prod'>
-                               <img src='../fotos/$datos->imagen' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
-                           </a>
-                           <div class='card-body'>
-                               <p class='card-text fw-bold'>$datos->nombre_pro</p>
-                               <small class='text-secondary'>$ $datos->precio</small>
-                               <br>
-                               <br>
-                       ";
-                           if($limites <= 5)
-                           {
-                               foreach ($tablComa as $datoComa) 
-                               {
-                                   $comparar = $datoComa->producto;
-                           
-                                   if ($comparar === $comparande) 
-                                   {
-                                       $estaEnCarrito = true;
-                                       break; // Rompe el bucle cuando se encuentra una coincidencia
-                                   }
-                               }
-                               if ($estaEnCarrito) {
-                                   echo "
-                                       <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Ya esta dentro del carrito </div></a>
-                                   ";
-                               }
-                               else
-                               {
-                                   echo "
-                                   <a href='../views/scripts/guardacarrito.php?id=$comparande' ><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
-                                   ";
-                               }
-                           }
-                           else
-                           {
-                               echo "
-                               <a href='#' ><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Carrito Lleno </div></a>
-                               ";
-                           }
-                       echo "
-                           </div>
-                       </div>
-                       ";
-                   }
+            $variable_pa = $_GET["variable_pa"];
+            
+            $cadenacom = "SELECT producto FROM detalle_orden WHERE id_usuario = '$id_usr' AND estado = 0 ";
+            $tablComa = $conn->query($cadenacom);
+            
+            $cadena = "SELECT * FROM productos WHERE categoria = '$variable_pa' AND existencia > 0 ORDER BY existencia DESC LIMIT 6";
+            $tabla = $conn->query($cadena);
+            
+            foreach ($tabla as $datos) {
+                $comparande = $datos['cve_prod']; // Corregido para acceder a la clave de producto
+                $estaEnCarrito = false;
+            
+                echo "
+                <div class='card m-2'>
+                    <a href='./producto.php?id={$datos["cve_prod"]}'>
+                        <img src='../fotos/{$datos["imagen"]}' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
+                    </a>
+                    <div class='card-body'>
+                        <p class='card-text fw-bold'>{$datos["nombre_pro"]}</p>
+                        <small class='text-secondary'>$ {$datos["precio"]}</small>
+                        <br>
+                        <br>
+                ";
+                if ($limites <= 5) {
+                    foreach ($tablComa as $datoComa) {
+                        $comparar = $datoComa['producto']; // Corregido para acceder al producto
+            
+                        if ($comparar === $comparande) {
+                            $estaEnCarrito = true;
+                            break; // Rompe el bucle cuando se encuentra una coincidencia
+                        }
+                    }
+                    if ($estaEnCarrito) {
+                        echo "
+                            <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Ya está en el carrito </div></a>
+                        ";
+                    } else {
+                        echo "
+                            <a href='../views/scripts/guardacarrito.php?id=$comparande'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
+                        ";
+                    }
+                } else {
+                    echo "
+                        <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Carrito Lleno </div></a>
+                    ";
+                }
+            
+                echo "
+                    </div>
+                </div>
+                ";
+            }    
            }
            else/*----------------------------*/
            {
                    $variable_pa = $_GET["variable_pa"];
-                   $query = new Select();
-
                    
-                   $cadena = "SELECT * from productos WHERE categoria = '$variable_pa' and existencia > 0 ORDER BY existencia DESC LIMIT 6 ";
-                   $tabla = $query->seleccionar($cadena);
-                   foreach ($tabla as $datos) 
-                   {
-                       echo "
-                       <div class='card m-2'>
-                           <a href='./producto.php?id=$datos->cve_prod'>
-                               <img src='../fotos/$datos->imagen' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
-                           </a>
-                           <div class='card-body'>
-                               <p class='card-text fw-bold'>$datos->nombre_pro</p>
-                               <small class='text-secondary'>$ $datos->precio</small>
-                               <br>
-                               <br>
-                               <a href='./login.php'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
-                           </div>
-                       </div>
-                       ";
-                   }
+                $cadena = "SELECT * FROM productos WHERE categoria = '$variable_pa' AND existencia > 0 ORDER BY existencia DESC LIMIT 6";
+                $tabla = $conn->query($cadena);
+                foreach ($tabla as $datos) {
+                    echo "
+                    <div class='card m-2'>
+                        <a href='./producto.php?id={$datos["cve_prod"]}'>
+                            <img src='../fotos/{$datos["imagen"]}' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
+                        </a>
+                        <div class='card-body'>
+                            <p class='card-text fw-bold'>{$datos["nombre_pro"]}</p>
+                            <small class='text-secondary'>$ {$datos["precio"]}</small>
+                            <br>
+                            <br>
+                            <a href='./login.php'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
+                        </div>
+                    </div>
+                    ";
+                }
 
            }/*----------------------------*/
 
@@ -487,107 +477,97 @@
            if(isset($_SESSION["correo"]))/*----------------------------*/
            {
                    $variable_ac = $_GET["variable_ac"];
-                   $query = new Select();
-
+            $cadenacom = "SELECT producto FROM detalle_orden WHERE id_usuario = '$id_usr' AND estado = 0 ";
+            $tablComa = $conn->query($cadenacom);
+            
+            $cadena = "SELECT * FROM productos WHERE categoria = '$variable_ac' AND existencia > 0 ORDER BY existencia DESC LIMIT 6";
+            $tabla = $conn->query($cadena);
+            
+            foreach ($tabla as $datos) {
+                $comparande = $datos['cve_prod']; // Corregido para acceder a la clave de producto
+                $estaEnCarrito = false;
+            
+                echo "
+                <div class='card m-2'>
+                    <a href='./producto.php?id={$datos["cve_prod"]}'>
+                        <img src='../fotos/{$datos["imagen"]}' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
+                    </a>
+                    <div class='card-body'>
+                        <p class='card-text fw-bold'>{$datos["nombre_pro"]}</p>
+                        <small class='text-secondary'>$ {$datos["precio"]}</small>
+                        <br>
+                        <br>
+                ";
+                if ($limites <= 5) {
+                    foreach ($tablComa as $datoComa) {
+                        $comparar = $datoComa['producto']; // Corregido para acceder al producto
+            
+                        if ($comparar === $comparande) {
+                            $estaEnCarrito = true;
+                            break; // Rompe el bucle cuando se encuentra una coincidencia
+                        }
+                    }
+                    if ($estaEnCarrito) {
+                        echo "
+                            <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Ya está en el carrito </div></a>
+                        ";
+                    } else {
+                        echo "
+                            <a href='../views/scripts/guardacarrito.php?id=$comparande'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
+                        ";
+                    }
+                } else {
+                    echo "
+                        <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Carrito Lleno </div></a>
+                    ";
+                }
+            
+                echo "
+                    </div>
+                </div>
+                ";
+            }
                    
-                   $cadena = "SELECT * from productos WHERE categoria = '$variable_ac' and existencia > 0 ORDER BY existencia DESC LIMIT 6 ";
-                   $tabla = $query->seleccionar($cadena);
-                   $cadenacom = "SELECT producto from detalle_orden WHERE id_usuario = '$id_usr' and estado = 0 ";
-                   $tablComa = $query->seleccionar($cadenacom);
-                   
-                   foreach ($tabla as $datos) 
-                   {
-                       $comparande = $datos->cve_prod;
-                       $estaEnCarrito = false;
-                   
-                   
-                       echo "
-                       <div class='card m-2'>
-                           <a href='./producto.php?id=$datos->cve_prod'>
-                               <img src='../fotos/$datos->imagen' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
-                           </a>
-                           <div class='card-body'>
-                               <p class='card-text fw-bold'>$datos->nombre_pro</p>
-                               <small class='text-secondary'>$ $datos->precio</small>
-                               <br>
-                               <br>
-                       ";
-                           if($limites <= 5)
-                           {
-                               foreach ($tablComa as $datoComa) 
-                               {
-                                   $comparar = $datoComa->producto;
-                           
-                                   if ($comparar === $comparande) 
-                                   {
-                                       $estaEnCarrito = true;
-                                       break; // Rompe el bucle cuando se encuentra una coincidencia
-                                   }
-                               }
-                               if ($estaEnCarrito) {
-                                   echo "
-                                       <a href='#'><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Ya esta dentro del carrito </div></a>
-                                   ";
-                               }
-                               else
-                               {
-                                   echo "
-                                   <a href='../views/scripts/guardacarrito.php?id=$comparande' ><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
-                                   ";
-                               }
-                           }
-                           else
-                           {
-                               echo "
-                               <a href='#' ><div class='btn btn-sm btn-danger' type='button' style='height:30px;'> Carrito Lleno </div></a>
-                               ";
-                           }
-                       echo "
-                           </div>
-                       </div>
-                       ";
-                   }
            }/*----------------------------*/
            else/*----------------------------*/
            {
-                   $variable_ac = $_GET["variable_ac"];
-                   $query = new Select();
+                   
 
                    
-                   $cadena = "SELECT * from productos WHERE categoria = '$variable_ac' and existencia > 0 ORDER BY existencia DESC LIMIT 6 ";
-                   $tabla = $query->seleccionar($cadena);
-                   foreach ($tabla as $datos) 
-                   {
-                       echo "
-                       <div class='card m-2'>
-                           <a href='./producto.php?id=$datos->cve_prod'>
-                               <img src='../fotos/$datos->imagen' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
-                           </a>
-                           <div class='card-body'>
-                               <p class='card-text fw-bold'>$datos->nombre_pro</p>
-                               <small class='text-secondary'>$ $datos->precio</small>
-                               <br>
-                               <br>
-                               <a href='./login.php'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
-                           </div>
-                       </div>
-                       ";
-                   }
+                $variable_ac = $_GET["variable_ac"];
+                $cadena = "SELECT * FROM productos WHERE categoria = '$variable_ac' AND existencia > 0 ORDER BY existencia DESC LIMIT 6";
+                $tabla = $conn->query($cadena);
+                foreach ($tabla as $datos) {
+                    echo "
+                    <div class='card m-2'>
+                        <a href='./producto.php?id={$datos["cve_prod"]}'>
+                            <img src='../fotos/{$datos["imagen"]}' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
+                        </a>
+                        <div class='card-body'>
+                            <p class='card-text fw-bold'>{$datos["nombre_pro"]}</p>
+                            <small class='text-secondary'>$ {$datos["precio"]}</small>
+                            <br>
+                            <br>
+                            <a href='./login.php'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
+                        </div>
+                    </div>
+                    ";
+                }
 
            }/*----------------------------*/
        }
        else /*------------RECARGAR----------------*/
        {
-                   $query = new Select();
 
-                   $cadenacom = "SELECT producto from detalle_orden WHERE id_usuario = '$id_usr' and estado = 0 ";
-                   $tablComa = $query->seleccionar($cadenacom);
+                   
 
            if(isset($_SESSION["correo"])) /*----------------------------*/
            {
+                   $cadenacom = "SELECT producto from detalle_orden WHERE id_usuario = '$id_usr' and estado = 0 ";
+                   $tablComa = $conn->query($cadenacom);
 
                    $cadena = "SELECT * from productos WHERE existencia > 0 ORDER BY existencia DESC LIMIT 10 ";
-                   $tabla = $query->seleccionar($cadena);
+                   $tabla = $conn->query($cadena);
                    foreach ($tabla as $datos) 
                    {
                        $comparande = $datos->cve_prod;
@@ -644,26 +624,37 @@
            }/*----------------------------*/
            else /*----------------------------*/
            {
-               $query = new Select();
-               $cadena = "SELECT * from productos WHERE existencia > 0 ORDER BY existencia DESC LIMIT 10 ";
-               $tabla = $query->seleccionar($cadena);
-               foreach ($tabla as $datos) 
-               {
-                   echo "
-                       <div class='card m-2'>
-                               <a href='./producto.php?id=$datos->cve_prod'>
-                               <img src='../fotos/$datos->imagen' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
-                               </a>
-                           <div class='card-body'>
-                               <p class='card-text fw-bold'>$datos->nombre_pro</p>
-                               <small class='text-secondary'>$ $datos->precio</small>
-                               <br>
-                               <br>
-                               <a href='./login.php' ><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
-                           </div>
-                       </div>
-                   ";
-               }
+                            
+               
+            $cadenaso = "SELECT * FROM productos WHERE existencia > 0 ORDER BY existencia DESC LIMIT 10";
+            $tabla = $conn->query($cadenaso);
+            
+            if ($tabla->num_rows > 0) {
+                echo "<div class='row'>";
+            
+                foreach ($tabla as $datos) {
+                    echo "
+                    <div class='col-md-4'>
+                        <div class='card m-2'>
+                            <a href='./producto.php?id={$datos["cve_prod"]}'>
+                                <img src='../fotos/{$datos["imagen"]}' style='width:250px; height:350px' class='card-img-top' height='300' alt='Product'/>
+                            </a>
+                            <div class='card-body'>
+                                <p class='card-text fw-bold'>{$datos["nombre_pro"]}</p>
+                                <small class='text-secondary'>$ {$datos["precio"]}</small>
+                                <br>
+                                <br>
+                                <a href='./login.php'><button class='btn btn-sm btn-dark' type='button' style='height:30px;'>Agregar al carrito</button></a>
+                            </div>
+                        </div>
+                    </div>
+                    ";
+                }
+            
+                echo "</div>";
+            } else {
+                echo "No se encontraron productos con existencia.";
+            }
 
            }/*----------------------------*/
         
